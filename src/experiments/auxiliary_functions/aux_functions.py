@@ -95,8 +95,9 @@ def plot_risk_comparison(
         n = len(y_true)
 
         first_pred = next(iter(preds.values()))
-        order      = np.argsort(first_pred)
-        y_sorted   = y_true[order]
+        # saudáveis (0) primeiro, depois doentes (1); ANFIS como desempate
+        order    = np.lexsort((first_pred, y_true))
+        y_sorted = y_true[order]
 
         fig, ax = plt.subplots(figsize=(min(18, max(10, n // 30)), 5))
 
