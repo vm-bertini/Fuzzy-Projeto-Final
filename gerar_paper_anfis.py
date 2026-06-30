@@ -6,8 +6,8 @@ Layout:
   Página 1  — coluna única (título + abstract)
   Páginas 2+ — duas colunas (corpo do paper)
 
-Subscripts usam Unicode (₀₁ₖⱼᵢ) em vez de <sub> HTML para evitar
-o artefato de caixa preta no reportlab.
+Fontes: Times New Roman TTF (suporte Unicode completo — gregos, ∏, Σ, etc.)
+Subscripts via tag <sub> do reportlab (sem artefato de caixa preta com TTF).
 """
 import os
 from reportlab.lib.pagesizes import LETTER
@@ -21,8 +21,21 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from pathlib import Path
 from PIL import Image as PILImage
+
+# ---------------------------------------------------------------------------
+# Registrar Times New Roman (TTF) — suporte a Unicode completo
+# ---------------------------------------------------------------------------
+_FD = 'C:/Windows/Fonts'
+pdfmetrics.registerFont(TTFont('TNR',    f'{_FD}/times.ttf'))
+pdfmetrics.registerFont(TTFont('TNR-B',  f'{_FD}/timesbd.ttf'))
+pdfmetrics.registerFont(TTFont('TNR-I',  f'{_FD}/timesi.ttf'))
+pdfmetrics.registerFont(TTFont('TNR-BI', f'{_FD}/timesbi.ttf'))
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
+registerFontFamily('TNR', normal='TNR', bold='TNR-B', italic='TNR-I', boldItalic='TNR-BI')
 
 # ---------------------------------------------------------------------------
 # Layout
@@ -43,19 +56,19 @@ RES = os.path.join('src', 'results', '2026_06_23_03_55')
 # ---------------------------------------------------------------------------
 def make_styles():
     S = {}
-    S['title']        = ParagraphStyle('title',  fontName='Times-Bold',   fontSize=16, leading=20, alignment=TA_CENTER, spaceAfter=4)
-    S['authors']      = ParagraphStyle('auth',   fontName='Times-Bold',   fontSize=10, leading=13, alignment=TA_CENTER, spaceAfter=2)
-    S['affil']        = ParagraphStyle('affil',  fontName='Times-Italic', fontSize=9,  leading=11, alignment=TA_CENTER, spaceAfter=6)
-    S['abstract']     = ParagraphStyle('abs',    fontName='Times-Roman',  fontSize=9,  leading=12, alignment=TA_JUSTIFY, spaceAfter=4, leftIndent=18, rightIndent=18)
-    S['keywords']     = ParagraphStyle('kw',     fontName='Times-Roman',  fontSize=9,  leading=11, alignment=TA_JUSTIFY, spaceAfter=6, leftIndent=18, rightIndent=18)
-    S['body']         = ParagraphStyle('body',   fontName='Times-Roman',  fontSize=10, leading=13, alignment=TA_JUSTIFY, spaceAfter=4)
-    S['section']      = ParagraphStyle('sec',    fontName='Times-Bold',   fontSize=10, leading=13, alignment=TA_CENTER, spaceBefore=8, spaceAfter=4)
-    S['subsection']   = ParagraphStyle('sub',    fontName='Times-Italic', fontSize=10, leading=13, alignment=TA_LEFT,   spaceBefore=5, spaceAfter=3)
-    S['caption']      = ParagraphStyle('cap',    fontName='Times-Roman',  fontSize=8,  leading=10, alignment=TA_CENTER, spaceBefore=2, spaceAfter=6)
-    S['eq']           = ParagraphStyle('eq',     fontName='Times-Italic', fontSize=10, leading=14, alignment=TA_CENTER, spaceBefore=3, spaceAfter=3)
-    S['th']           = ParagraphStyle('th',     fontName='Times-Bold',   fontSize=9,  leading=11, alignment=TA_CENTER)
-    S['tb']           = ParagraphStyle('tb',     fontName='Times-Roman',  fontSize=9,  leading=11, alignment=TA_CENTER)
-    S['tbl']          = ParagraphStyle('tbl',    fontName='Times-Roman',  fontSize=9,  leading=11, alignment=TA_LEFT)
+    S['title']        = ParagraphStyle('title',  fontName='TNR-B',  fontSize=16, leading=20, alignment=TA_CENTER, spaceAfter=4)
+    S['authors']      = ParagraphStyle('auth',   fontName='TNR-B',  fontSize=10, leading=13, alignment=TA_CENTER, spaceAfter=2)
+    S['affil']        = ParagraphStyle('affil',  fontName='TNR-I',  fontSize=9,  leading=11, alignment=TA_CENTER, spaceAfter=6)
+    S['abstract']     = ParagraphStyle('abs',    fontName='TNR',    fontSize=9,  leading=12, alignment=TA_JUSTIFY, spaceAfter=4, leftIndent=18, rightIndent=18)
+    S['keywords']     = ParagraphStyle('kw',     fontName='TNR',    fontSize=9,  leading=11, alignment=TA_JUSTIFY, spaceAfter=6, leftIndent=18, rightIndent=18)
+    S['body']         = ParagraphStyle('body',   fontName='TNR',    fontSize=10, leading=13, alignment=TA_JUSTIFY, spaceAfter=4)
+    S['section']      = ParagraphStyle('sec',    fontName='TNR-B',  fontSize=10, leading=13, alignment=TA_CENTER, spaceBefore=8, spaceAfter=4)
+    S['subsection']   = ParagraphStyle('sub',    fontName='TNR-I',  fontSize=10, leading=13, alignment=TA_LEFT,   spaceBefore=5, spaceAfter=3)
+    S['caption']      = ParagraphStyle('cap',    fontName='TNR',    fontSize=8,  leading=10, alignment=TA_CENTER, spaceBefore=2, spaceAfter=6)
+    S['eq']           = ParagraphStyle('eq',     fontName='TNR-I',  fontSize=10, leading=14, alignment=TA_CENTER, spaceBefore=3, spaceAfter=3)
+    S['th']           = ParagraphStyle('th',     fontName='TNR-B',  fontSize=9,  leading=11, alignment=TA_CENTER)
+    S['tb']           = ParagraphStyle('tb',     fontName='TNR',    fontSize=9,  leading=11, alignment=TA_CENTER)
+    S['tbl']          = ParagraphStyle('tbl',    fontName='TNR',    fontSize=9,  leading=11, alignment=TA_LEFT)
     return S
 
 S = make_styles()
@@ -218,42 +231,42 @@ T['en'] = dict(
     arch_intro = [
         ('The proposed ANFIS follows the zero-order Takagi-Sugeno paradigm with '
          'three trainable layers. The data flow is:'),
-        'X [B,11] → MixedFuzzyLayer → [B,11,M] → ClusterRuleLayer → [B,R] → DefuzzyLayer → [B,1] → sigmoid → P(disease)',
+        'X [B,11] → MixedFuzzyLayer [B,11,M] → ClusterRuleLayer [B,R] → DefuzzyLayer [B,1] → σ → P(disease)',
         ('where B is the batch size, M the number of MFs per numerical feature, '
          'and R the number of rules in the pool.'),
     ],
     mfl = [
         ('<u>Numerical features</u> — trainable Gaussian MFs with center c and '
-         'spread s, optimized by backpropagation:'),
-        'mu(x) = exp( -0.5 * ((x - c) / s)^2 )',
-        ('Spreads are clamped at s >= 1e-6 and initialized as '
-         's = |N(0,1)| + 0.1 to guarantee positivity.'),
+         'spread σ, optimized by backpropagation:'),
+        'μ(x) = exp( −½ · ((x − c) / σ)² )',
+        ('Spreads are clamped at σ ≥ 10⁻⁶ and initialized as '
+         'σ = |𝒩(0,1)| + 0.1 to guarantee positivity.'),
         ('<u>Categorical features</u> — smoothed one-hot encoding, no trainable '
          'parameters. For a variable with n categories:'),
-        'mu_j(cat) = 0.95  if j = cat,   else  0.05 / (n - 1)',
+        'μ<sub>j</sub>(cat) = 0.95  if j = cat,   else  0.05 / (n − 1)',
         ('This provides a non-zero gradient to non-matching positions, '
          'preventing rule collapse during training.'),
     ],
     crl = [
         ('The firing strength of rule k is the product T-norm over all features:'),
-        'w_k = product_i  mu_{i, combo[k,i]}( x_i )',
+        'w<sub>k</sub> = ∏<sub>i</sub> μ<sub>i,k</sub>( x<sub>i</sub> )',
         ('where combo[k,i] is the MF index of rule k in feature i. '
          'The combination table is stored as a register_buffer (automatic GPU migration). '
          'No trainable parameters.'),
     ],
     dfl = [
         ('Normalized Takagi-Sugeno defuzzification:'),
-        'w~_k = w_k / ( sum_j w_j + eps )',
-        'y_hat = sum_k  w~_k * c_k',
-        ('The consequents c_k are weights of nn.Linear(R→1). '
+        'w̃<sub>k</sub> = w<sub>k</sub> / ( Σ<sub>j</sub> w<sub>j</sub> + ε )',
+        'ŷ = Σ<sub>k</sub> w̃<sub>k</sub> · c<sub>k</sub>',
+        ('The consequents c<sub>k</sub> are weights of nn.Linear(R→1). '
          'Normalization keeps output scale independent of how many rules fire '
-         'simultaneously, preserving the linguistic interpretation of each c_k.'),
+         'simultaneously, preserving the linguistic interpretation of each c<sub>k</sub>.'),
     ],
     loss = [
         ('The loss combines binary cross-entropy with a center-separation penalty:'),
-        'L = BCE( sigma(y_hat), y )  +  lambda * sum_{i&lt;j}  relu( s_i + s_j - |c_i - c_j| )',
-        ('The penalty (lambda=0.1) is zero when adjacent MF centers are at least '
-         's_i + s_j apart, and grows linearly otherwise, preventing a narrow MF '
+        'L = BCE( σ(ŷ), y ) + λ · Σ<sub>i&lt;j</sub> relu( σ<sub>i</sub> + σ<sub>j</sub> − |c<sub>i</sub> − c<sub>j</sub>| )',
+        ('The penalty (λ=0.1) is zero when adjacent MF centers are at least '
+         'σ<sub>i</sub> + σ<sub>j</sub> apart, and grows linearly otherwise, preventing a narrow MF '
          'from collapsing inside a wider one.'),
     ],
     kmeans = [
@@ -454,42 +467,42 @@ T['ptbr'] = dict(
     arch_intro = [
         ('O modelo ANFIS segue o paradigma Takagi-Sugeno de ordem zero com '
          'três camadas treináveis encadeadas. O fluxo de dados é:'),
-        'X [B,11] → MixedFuzzyLayer → [B,11,M] → ClusterRuleLayer → [B,R] → DefuzzyLayer → [B,1] → sigmoid → P(doença)',
+        'X [B,11] → MixedFuzzyLayer [B,11,M] → ClusterRuleLayer [B,R] → DefuzzyLayer [B,1] → σ → P(doença)',
         ('onde B é o batch size, M o número de MFs por feature numérica '
          'e R o número de regras no pool.'),
     ],
     mfl = [
         ('<u>Features numéricas</u> — MFs Gaussianas treináveis com centro c e '
-         'dispersão s, otimizados por retropropagação:'),
-        'mu(x) = exp( -0,5 * ((x - c) / s)^2 )',
-        ('Dispersões são clampeadas em s >= 1e-6 e inicializadas como '
-         's = |N(0,1)| + 0,1 para garantir positividade.'),
+         'dispersão σ, otimizados por retropropagação:'),
+        'μ(x) = exp( −½ · ((x − c) / σ)² )',
+        ('Dispersões são clampeadas em σ ≥ 10⁻⁶ e inicializadas como '
+         'σ = |𝒩(0,1)| + 0,1 para garantir positividade.'),
         ('<u>Features categóricas</u> — codificação one-hot suavizada, sem '
          'parâmetros treináveis. Para uma variável com n categorias:'),
-        'mu_j(cat) = 0,95  se j = cat,   caso contrário  0,05 / (n - 1)',
+        'μ<sub>j</sub>(cat) = 0,95  se j = cat,   caso contrário  0,05 / (n − 1)',
         ('Fornece gradiente não-nulo às posições não-correspondentes, '
          'evitando colapso de regras no treinamento.'),
     ],
     crl = [
         ('A força de disparo da regra k é a T-norma produto sobre todas as features:'),
-        'w_k = produto_i  mu_{i, combo[k,i]}( x_i )',
+        'w<sub>k</sub> = ∏<sub>i</sub> μ<sub>i,k</sub>( x<sub>i</sub> )',
         ('onde combo[k,i] é o índice da MF da regra k na feature i. '
          'A tabela de combinações é armazenada como register_buffer (migração '
          'automática para GPU). Sem parâmetros treináveis.'),
     ],
     dfl = [
         ('Defuzzificação Takagi-Sugeno normalizada:'),
-        'w~_k = w_k / ( soma_j w_j + eps )',
-        'y_hat = soma_k  w~_k * c_k',
-        ('Os consequentes c_k são pesos de nn.Linear(R→1). '
+        'w̃<sub>k</sub> = w<sub>k</sub> / ( Σ<sub>j</sub> w<sub>j</sub> + ε )',
+        'ŷ = Σ<sub>k</sub> w̃<sub>k</sub> · c<sub>k</sub>',
+        ('Os consequentes c<sub>k</sub> são pesos de nn.Linear(R→1). '
          'A normalização mantém a escala da saída independente do número de regras '
-         'que disparam simultaneamente, preservando a interpretação linguística de c_k.'),
+         'que disparam simultaneamente, preservando a interpretação linguística de c<sub>k</sub>.'),
     ],
     loss = [
         ('A função de perda combina entropia cruzada binária com penalidade de separação:'),
-        'L = BCE( sigma(y_hat), y )  +  lambda * soma_{i&lt;j}  relu( s_i + s_j - |c_i - c_j| )',
-        ('A penalidade (lambda=0,1) é zero quando centros adjacentes estão '
-         'afastados por pelo menos s_i + s_j, e cresce linearmente caso contrário, '
+        'L = BCE( σ(ŷ), y ) + λ · Σ<sub>i&lt;j</sub> relu( σ<sub>i</sub> + σ<sub>j</sub> − |c<sub>i</sub> − c<sub>j</sub>| )',
+        ('A penalidade (λ=0,1) é zero quando centros adjacentes estão '
+         'afastados por pelo menos σ<sub>i</sub> + σ<sub>j</sub>, e cresce linearmente caso contrário, '
          'impedindo que uma MF estreita fique contida dentro de outra mais larga.'),
     ],
     kmeans = [
